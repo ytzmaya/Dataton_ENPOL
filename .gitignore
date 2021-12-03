@@ -16,3 +16,42 @@ bin-release/
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
 # should NOT be excluded as they contain compiler settings and other important
 # information for Eclipse / Flash Builder.
+
+# System files
+.DS_Store
+
+# R history
+.Rhistory
+.Rapp.history
+
+# R Projects and user data
+.Ruserdata
+.Rproj.user/
+.Rdata
+
+# Rplots
+Rplots.pdf
+
+# Icon files
+Icon
+Icon\r
+Icon\r\r
+Icon?
+
+# VSCode
+**/.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.vscode/
+
+# Local History for Visual Studio Code
+.history/
+
+# Data files
+*.csv
+*.rds
+*.xlsx
+*.dbf
