@@ -260,6 +260,278 @@ enpol2021 %>%
   mutate(pct = round(total/sum(total)*100, 1),
          year = 2021) %>% 
   rename(p10_6 = p10_7)
-) 
-  
-  
+) %>% 
+  filter(p10_6 %in% 1:4) %>% 
+  mutate(p10_6 = factor(p10_6, 
+                        levels = c(1,2,3,4),
+                        labels = c("Muy probable", "Algo probable",
+                                   "Algo improbable", "Muy improbable")),
+         sexo = ifelse(sexo==1, "Hombres", "Mujeres"))
+
+ggplot(data = tempo, aes(x = p10_6, y = pct, fill = as.factor(year))) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = paste0(pct, "%")), position = position_dodge(width = 1)) +
+  facet_wrap(~sexo) +
+  coord_flip() +
+  labs(title = "¿Qué tan probable improbable considera regresar a prisión...?",
+       subtitle = "Por sexo y año",
+       x = "", y = "", fill = "",
+       caption = "Fuente: Elaboración propia con datos de la ENPOL 2016 y 2021, pregunta P10.6 y P10.7") +
+  theme_minimal() +
+  theme(text = element_text(size = 18, face = "bold"),
+        plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        plot.subtitle = element_text(face = "bold", size = 16, hjust = 0.5),
+        axis.text.x = element_blank(),
+        legend.position = "top")
+
+ggsave(here("01_códigos/01_políticas/output/expect-probreincid-sexo-.svg"), width = 10, height = 10)
+
+# ---- Programas
+ tempo <- enpol2021 %>% 
+   group_by(sexo, p10_8) %>% 
+   summarise(total = sum(as.integer(fac_per), na.rm = T)) %>% 
+   ungroup() %>% 
+   group_by(sexo) %>% 
+   mutate(pct = round(total/sum(total)*100, 1)) %>% 
+   filter(p10_8 == 1) %>%  
+   mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"))
+ 
+ggplot(tempo, aes(x = as.factor(sexo), y = pct, fill = as.factor(sexo))) +  
+ geom_col() +
+  geom_text(aes(label = paste0(pct, "%")), size = 14) +
+  labs(title = "Conoce o ha escuchado sobre algún programa o ayuda (programa postpenitenciario)\npara que los internos que salen libres se reincorporen a la vida en libertad",
+       subtitle = "Por sexo",
+       x = "", y = "", fill = "",
+       caption = "Fuente: Elaboración propia con datos de la ENPOL 2021, pregunta P10.8") +
+  theme_minimal() +
+  theme(text = element_text(size = 18, face = "bold"),
+        plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        plot.subtitle = element_text(face = "bold", size = 16, hjust = 0.5),
+        axis.text.y = element_blank(),
+        legend.position = "none")  
+ 
+ggsave(here("01_códigos/01_políticas/output/conoce-prog-sexo.svg"), width = 10, height = 10)
+
+
+# ---- le gustaría beneficiarse
+
+tempo <- enpol2021 %>% 
+  group_by(sexo, p10_9) %>% 
+  summarise(total = sum(as.integer(fac_per), na.rm = T)) %>% 
+  ungroup() %>% 
+  group_by(sexo) %>% 
+  mutate(pct = round(total/sum(total)*100, 1)) %>% 
+  filter(p10_9 == 1) %>%  
+  mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"))
+
+ggplot(tempo, aes(x = as.factor(sexo), y = pct, fill = as.factor(sexo))) +  
+  geom_col() +
+  geom_text(aes(label = paste0(pct, "%")), size = 14) +
+  labs(title = "Participaría en estos programas o se beneficiaría de esa ayuda",
+       subtitle = "Por sexo",
+       x = "", y = "", fill = "",
+       caption = "Fuente: Elaboración propia con datos de la ENPOL 2021, pregunta P10.9") +
+  theme_minimal() +
+  theme(text = element_text(size = 18, face = "bold"),
+        plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        plot.subtitle = element_text(face = "bold", size = 16, hjust = 0.5),
+        axis.text.y = element_blank(),
+        legend.position = "none")  
+
+ggsave(here("01_códigos/01_políticas/output/benef-prog-sexo.svg"), width = 10, height = 10)
+
+# ---- vivienda
+
+tempo <- bind_rows(
+  enpol2016 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_2, p10_3) %>% 
+    summarise(total = sum(as.integer(fac_per), na.rm = T)) %>% 
+    ungroup() %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_2 == 1) %>%  
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2016),
+  enpol2021 %>% 
+    group_by(sexo, p10_2, p10_3) %>% 
+    summarise(total = sum(as.integer(fac_per), na.rm = T)) %>% 
+    ungroup() %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_2 == 1) %>%  
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2021)
+) %>% 
+  filter(p10_3 %in% 1:2) %>%
+  mutate(p10_3 = ifelse(p10_3 == 1, "Regresa a donde vivía", "Se va a otro lugar"))
+ 
+ggplot(data = tempo, aes(x = p10_3, y = pct, fill = sexo)) +
+  geom_col(position = "dodge") + 
+  geom_text(aes(label = paste0(pct, "%")), size = 8, position = position_dodge(width = 1)) +
+  labs(title = "Si tiene a dónde regresar a vivir, ¿sería el lugar donde vivía?",
+       subtitle = "Por sexo",
+       x = "", y = "", fill = "",
+       caption = "Fuente: Elaboración propia con datos de la ENPOL 2016 y 2021, pregunta P10.3") +
+  facet_wrap(~year) +
+  theme_minimal() +
+  theme(text = element_text(size = 18, face = "bold"),
+        plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        plot.subtitle = element_text(face = "bold", size = 16, hjust = 0.5),
+        axis.text.y = element_blank(),
+        legend.position = "top")  
+
+ggsave(here("01_códigos/01_políticas/output/vivienda-retorno-sexo.svg"), width = 10, height = 10)
+
+# razones de no volver
+tempo <- bind_rows(
+  enpol2016 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_01) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_01)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_01 == 1) %>%  
+    select(-p10_4_01) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2016,
+           var = "Lo(a) rechazarían las personas con quienes vivía"),
+  enpol2016 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_02) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_02)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_02 == 1) %>%  
+    select(-p10_4_02) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2016,
+           var = "Las personas con quienes vivía se han mudado"),
+  enpol2016 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_03) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_03)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_03 == 1) %>%  
+    select(-p10_4_03) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2016,
+           var = "No tendría para pagar un lugar"),
+  enpol2016 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_04) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_04)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_04 == 1) %>%  
+    select(-p10_4_04) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2016,
+           var = "Ha perdido contacto con sus conocidos"),
+  enpol2016 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_07) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_07)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_07 == 1) %>%  
+    select(-p10_4_07) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2016,
+           var = "No quiere afectar a su familia"),
+  enpol2021 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_1) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_1)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_1 == 1) %>%  
+    select(-p10_4_1) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2021,
+           var = "Lo(a) rechazarían las personas con quienes vivía"),
+  enpol2021 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_2) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_2)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_2 == 1) %>%  
+    select(-p10_4_2) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2021,
+           var = "Las personas con quienes vivía se han mudado"),
+  enpol2021 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_3) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_3)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_3 == 1) %>%  
+    select(-p10_4_3) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2021,
+           var = "No tendría para pagar un lugar"),
+  enpol2021 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_4) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_4)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_4 == 1) %>%  
+    select(-p10_4_4) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2021,
+           var = "Ha perdido contacto con sus conocidos"),
+  enpol2021 %>% 
+    mutate(across(everything(), as.integer)) %>% 
+    group_by(sexo, p10_4_5) %>% 
+    summarise(total = sum(fac_per, na.rm = T)) %>% 
+    ungroup() %>% 
+    filter(!is.na(p10_4_5)) %>% 
+    group_by(sexo) %>% 
+    mutate(pct = round(total/sum(total)*100, 1)) %>% 
+    filter(p10_4_5 == 1) %>%  
+    select(-p10_4_5) %>% 
+    mutate(sexo = ifelse(sexo==1, "Hombres", "Mujeres"),
+           year = 2021,
+           var = "No quiere afectar a su familia")
+)
+
+ggplot(data = tempo, aes(x = var, y = pct, fill = as.factor(year))) +
+  geom_col(position = "dodge") + 
+  geom_text(aes(label = paste0(pct, "%")), size = 5, position = position_dodge(width = 1)) +
+  labs(title = "Razones por las que no tiene dónde vivir al salir",
+       subtitle = "Por sexo y año",
+       x = "", y = "", fill = "",
+       caption = "Fuente: Elaboración propia con datos de la ENPOL 2016 y 2021, pregunta P10.4") +
+  facet_wrap(~sexo) +
+  theme_minimal() +
+  theme(text = element_text(size = 18, face = "bold"),
+        plot.title = element_text(face = "bold", size = 20, hjust = 0.5),
+        plot.subtitle = element_text(face = "bold", size = 16, hjust = 0.5),
+        axis.text.x = element_blank(),
+        legend.position = "top")+
+  coord_flip()
+
+ggsave(here("01_códigos/01_políticas/output/vivienda-razones-sexo.svg"), width = 12, height = 12)
+
