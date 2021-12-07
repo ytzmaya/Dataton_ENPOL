@@ -1,11 +1,11 @@
 #------------------------------------------------------------------------------#
 # Proyecto:              ENPOL 2021 (Tema 3. Tortura y fabricación de culpables)
-# Objetivo:              Procesamiento inicial de microdatos 
+# Objetivo:              Procesamiento inicial de microdatos de 2021
 #
 # Encargadas:            Adriana Ortega (INTR)  | Regina I. Medina (INTR)
 # Correo:                aortega@intersecta.org | rmedina@intersecta.org
 # Fecha de creación:     06 de diciembre de 2021
-# Última actualización:  06 de diciembre de 2021
+# Última actualización:  07 de diciembre de 2021
 #------------------------------------------------------------------------------#
 
 # Fuente: https://www.inegi.org.mx/programas/enpol/2016/
@@ -26,7 +26,7 @@ options(dplyr.summarise.inform = FALSE)
 
 # Cargar librerías 
 require(pacman)
-p_load(foreign, tidyverse, dplyr, srvyr)
+p_load(googledrive, googlesheets4, foreign, tidyverse, dplyr, srvyr)
 
 # Limpiar espacio de trabajo 
 rm(list=ls())
@@ -36,37 +36,50 @@ inp         <- "02_datos_crudos/ENPOL/2016/"
 out_data    <- "03_datos_limpios/03_tortura/"
 out_figs    <- "04_figuras/03_tortura/"
 
-
 # 1. Cargar datos --------------------------------------------------------------
 
-df_raw1 <- read.dbf(paste0(inp, "ENPOL_SOC"      , ".dbf"))
-df_raw2 <- read.dbf(paste0(inp, "ENPOL_SEC2_3_4" , ".dbf"))
-df_raw3 <- read.dbf(paste0(inp, "ENPOL_SEC_5_6"  , ".dbf"))
-df_raw4 <- read.dbf(paste0(inp, "ENPOL_SEC7_1"   , ".dbf"))
-df_raw5 <- read.dbf(paste0(inp, "ENPOL_SEC7_2"   , ".dbf"))
-df_raw6 <- read.dbf(paste0(inp, "ENPOL_SEC8_9_10", ".dbf"))
+#--- Importar ids de archivos de ENPOL2021 de la carpeta de drive
+df_files <- drive_ls(as_id("1TigvyIp4QZmkSoGR58bekibx3bTQ7fhb")) 
 
-dim(df_raw1) # Todas las bases tienen el mismo número de observaciones (58,127)
+#--- Importar primera base de ENPOL2021 (prueba)
+temp    <- tempfile(fileext = ".csv")
+dl      <- drive_download(as_id(df_files$id[1]), path = temp, overwrite = TRUE)
+df_raw1 <- read_csv(dl$local_path, locale = locale(encoding = "latin1"))
+
+#--- Importar bases en bucle 
+for(i in 1:7){
+    temp    <- tempfile(fileext = ".csv")
+    
+    dl <- drive_download(as_id(df_files$id[i]), path = temp, overwrite = TRUE)
+    
+    df_csv <- read_csv(dl$local_path, locale = locale(encoding = "latin1"))
+    
+    assign(paste0("df_raw", i), df_csv)
+}
+
+dim(df_raw1) # Todas las bases tienen el mismo número de observaciones (61,449)
 
 # 2. Procesar datos ------------------------------------------------------------
 
 ## 2.1. Unificación de bases ---------------------------------------------------
 
 # Variables que conforman la llave personal 
-v_llave <- c("ID_PER", "CVE_ENT", "NOM_ENT", "CEN_INT", "NOM_INT", 
-    "RESUL_VIV", "SEXO", "FUERO")
+v_llave     <- c("ID_PER" , "CVE_ENT", "NOM_ENT", "CEN_INT", 
+                 "NOM_INT", "SEXO"   , "FUERO")
 
 # Varibales muestrales 
 v_expansion <- c("EST_DIS", "FPC", "FAC_PER")
 
+# Unir bases
 df_unida <- df_raw1                                     %>% 
     full_join(df_raw2, by = c(v_llave, v_expansion))    %>% 
     full_join(df_raw3, by = c(v_llave, v_expansion))    %>% 
     full_join(df_raw4, by = c(v_llave, v_expansion))    %>% 
     full_join(df_raw5, by = c(v_llave, v_expansion))    %>% 
     full_join(df_raw6, by = c(v_llave, v_expansion))    %>% 
-    mutate(year = 2016)
-    
+    full_join(df_raw7, by = c(v_llave, v_expansion))    %>% 
+    mutate(year = 2021)
+
 dim(df_unida) # Las mismas 58,127 observaciones
 
 ## 2.2. Clasificación de variables binarias ------------------------------------
@@ -101,64 +114,65 @@ df_binaria <- df_unida                                  %>%
             !(P3_8_1    == 1 | P3_8_2 == 1 | P3_8_3 == 1 | P3_8_4 == 1 | 
               P3_8_5    == 1 | P3_8_6 == 1 | P3_8_7 == 1 | P3_8_8 == 1) ~ 0, 
             # Casos en donde se usó algún tipo de abuso de fuerza
-             (P3_8_1    == 1 | P3_8_2 == 1 | P3_8_3 == 1 | P3_8_4 == 1 | 
-              P3_8_5    == 1 | P3_8_6 == 1 | P3_8_7 == 1 | P3_8_8 == 1) ~ 1, 
+             (P3_13_02 == 1 | P3_13_03 == 1 | P3_13_04 == 1 | P3_13_05 == 1 | 
+              P3_13_06 == 1 | P3_13_07 == 1 | P3_13_08 == 1 | P3_13_09 == 1 |
+              P3_13_10 == 1 | P3_13_11 == 1 | P3_13_12 == 1) ~ 1, 
             # En todas responde que no sabe o no responde
              (P3_8_1 %in% c(8, 9) & P3_8_2 %in% c(8, 9)  & P3_8_3 %in% c(8, 9) & 
               P3_8_4 %in% c(8, 9) & P3_8_5 %in% c(8, 9)  & P3_8_6 %in% c(8, 9) & 
               P3_8_7 %in% c(8, 9) & P3_8_8 %in% c(8, 9)) ~ NA_real_), 
-        # Indicador 1 de tortura y malos tratos
-        tortura1 = case_when(
+        # Idicador 1 de tortura y malos tratos
+        torura1 = case_when(
             # Casos donde no hubo tortura
             !(P3_12_1 == 1 | P3_12_2 == 1 | P3_12_3 == 1 | P3_12_4 == 1 | 
-              P3_12_5 == 1 | P3_12_6 == 1 | P3_12_7 == 1 | P3_12_8 == 1 | 
-              P3_12_9 == 1) ~ 0,
+                    P3_12_5 == 1 | P3_12_6 == 1 | P3_12_7 == 1 | P3_12_8 == 1 | 
+                    P3_12_9 == 1) ~ 0,
             # Casos en donde hubo tortura
-             (P3_12_1 == 1 | P3_12_2 == 1 | P3_12_3 == 1 | P3_12_4 == 1 | 
-              P3_12_5 == 1 | P3_12_6 == 1 | P3_12_7 == 1 | P3_12_8 == 1 | 
-              P3_12_9 == 1) ~ 1,
+            (P3_12_1 == 1 | P3_12_2 == 1 | P3_12_3 == 1 | P3_12_4 == 1 | 
+                    P3_12_5 == 1 | P3_12_6 == 1 | P3_12_7 == 1 | P3_12_8 == 1 | 
+                    P3_12_9 == 1) ~ 1,
             # Casos en donde siempre respondió no sé o no respondió 
-             (P3_12_1 %in% c(8, 9) & P3_12_2 %in% c(8, 9) & 
-              P3_12_3 %in% c(8, 9) & P3_12_4 %in% c(8, 9) &
-              P3_12_5 %in% c(8, 9) & P3_12_6 %in% c(8, 9) & 
-              P3_12_7 %in% c(8, 9) & P3_12_8 %in% c(8, 9) & 
-              P3_12_9 %in% c(8, 9)) ~ NA_real_),
+            (P3_12_1 %in% c(8, 9) & P3_12_2 %in% c(8, 9) & 
+                    P3_12_3 %in% c(8, 9) & P3_12_4 %in% c(8, 9) &
+                    P3_12_5 %in% c(8, 9) & P3_12_6 %in% c(8, 9) & 
+                    P3_12_7 %in% c(8, 9) & P3_12_8 %in% c(8, 9) & 
+                    P3_12_9 %in% c(8, 9)) ~ NA_real_),
         # Indicador 1 de tortura y malos tratos
         tortura2 = case_when(
             # Casos donde no hubo tortura
             !(P3_13_1 == 1 | P3_13_2 == 1 | P3_13_3 == 1 | P3_13_4 == 1 | 
-              P3_13_5 == 1 | P3_13_6 == 1 | P3_13_7 == 1 | P3_13_8 == 1 | 
-                                                           P3_13_9 == 1) ~ 0,
+                    P3_13_5 == 1 | P3_13_6 == 1 | P3_13_7 == 1 | P3_13_8 == 1 | 
+                    P3_13_9 == 1) ~ 0,
             # Casos en donde hubo tortura
-             (P3_13_1 == 1 | P3_13_2 == 1 | P3_13_3 == 1 | P3_13_4 == 1 | 
-              P3_13_5 == 1 | P3_13_6 == 1 | P3_13_7 == 1 | P3_13_8 == 1 | 
-                                                           P3_13_9 == 1) ~ 1,
+            (P3_13_1 == 1 | P3_13_2 == 1 | P3_13_3 == 1 | P3_13_4 == 1 | 
+                    P3_13_5 == 1 | P3_13_6 == 1 | P3_13_7 == 1 | P3_13_8 == 1 | 
+                    P3_13_9 == 1) ~ 1,
             # Casos en donde siempre respondió no sé o no respondió 
-             (P3_13_1 %in% c(8, 9) & P3_13_2 %in% c(8, 9)  & 
-              P3_13_3 %in% c(8, 9) & P3_13_4 %in% c(8, 9)  &
-              P3_13_5 %in% c(8, 9) & P3_13_6 %in% c(8, 9)  & 
-              P3_13_7 %in% c(8, 9) & P3_13_8 %in% c(8, 9)  & 
-                                     P3_13_9 %in% c(8, 9)) ~ NA_real_),
+            (P3_13_1 %in% c(8, 9) & P3_13_2 %in% c(8, 9)  & 
+                    P3_13_3 %in% c(8, 9) & P3_13_4 %in% c(8, 9)  &
+                    P3_13_5 %in% c(8, 9) & P3_13_6 %in% c(8, 9)  & 
+                    P3_13_7 %in% c(8, 9) & P3_13_8 %in% c(8, 9)  & 
+                    P3_13_9 %in% c(8, 9)) ~ NA_real_),
         #Juntar las dos variables de tortura 
         tortura = ifelse(tortura1 == 1 | tortura2 == 1, 1, 0)) 
 
 # Revisar que las variables nuevas estén correctas
-        # table(df_binaria$ppo)
-        # sum(is.na(df_binaria$ppo))
-        # 
-        # table(df_binaria$uso_fuerza)
-        # sum(is.na(df_binaria$uso_fuerza))
-        # 
-        # table(df_binaria$tortura1)
-        # sum(is.na(df_binaria$tortura1))
-        # 
-        # table(df_binaria$tortura2)
-        # sum(is.na(df_binaria$tortura2))
-        # 
-        # table(df_binaria$tortura)
-        # sum(is.na(df_binaria$tortura))
+# table(df_binaria$ppo)
+# sum(is.na(df_binaria$ppo))
+# 
+# table(df_binaria$uso_fuerza)
+# sum(is.na(df_binaria$uso_fuerza))
+# 
+# table(df_binaria$tortura1)
+# sum(is.na(df_binaria$tortura1))
+# 
+# table(df_binaria$tortura2)
+# sum(is.na(df_binaria$tortura2))
+# 
+# table(df_binaria$tortura)
+# sum(is.na(df_binaria$tortura))
 
-    
+
 ## 2.3. Diseño de encuesta -----------------------------------------------------
 
 # Revisar el diseño para que tenga todos los parámetros bien especificados
@@ -269,8 +283,3 @@ ggplot(df_tortura,
     aes(x = ppo, y = prop_tortura, fill = tortura)) +
     facet_grid(~sexo) +
     geom_col()
-
-
-# 3. Guardar datos -------------------------------------------------------------
-
-# FIN. -------------------------------------------------------------------------
