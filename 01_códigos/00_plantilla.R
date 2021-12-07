@@ -1,11 +1,11 @@
 #------------------------------------------------------------------------------#
-# Proyecto:                   ENPOL 2021 (3. Tortura y fabricación de culpables)
-# Objetivo:                   Limpieza inicial de preguntas relevantes al tema 3
+# Proyecto:              ENPOL 2021 (Tema 3. Tortura y fabricación de culpables)
+# Objetivo:              Limpieza inicial de preguntas relevantes al tema 3
 #
-# Encargadas:                 Adriana Ortega (INTR)  | Regina I. Medina (INTR)
-# Correo:                     aortega@intersecta.org | rmedina@intersecta.org
-# Fecha de creación:          06 de diciembre de 2021
-# Última actualización:       06 de diciembre de 2021
+# Encargadas:            Adriana Ortega (INTR)  | Regina I. Medina (INTR)
+# Correo:                aortega@intersecta.org | rmedina@intersecta.org
+# Fecha de creación:     06 de diciembre de 2021
+# Última actualización:  06 de diciembre de 2021
 #------------------------------------------------------------------------------#
 
 # Fuente: https://www.inegi.org.mx/programas/enpol/2016/
