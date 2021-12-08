@@ -80,162 +80,279 @@ df_unida <- df_raw1                                     %>%
     full_join(df_raw7, by = c(v_llave, v_expansion))    %>% 
     mutate(year = 2021)
 
-dim(df_unida) # Las mismas 58,127 observaciones
+dim(df_unida) # Las mismas 61,449 observaciones
+
+
+df_mujeres <- df_unida %>% filter(SEXO == 2) 
 
 ## 2.2. Clasificación de variables binarias ------------------------------------
 
-# Clasificación de PPO vigente en 2021
+# Variables de interés vigentes en 2021
 
 # Observaciones donde la persona no sabe o no respondió sobre el delito
 table(df_unida$P5_8_98)
 table(df_unida$P5_8_99)
 
+# Personas sentenciadas (P5_3)
+
+# Delitos con PPO                Procesadas | Sentenciadas
+# - Robo a casa habitación       (P5_11_02) | (P5_31_02)
+# - Homicidio doloso             (P5_11_12) | (P5_31_12)
+# - Portación ilegal de armas    (P5_11_13) | (P5_31_13)
+# - Secuestro y secuestro exprés (P5_11_17) | (P5_31_17)
+# - Violación sexual             (P5_11_18) | (P5_31_18)
+# - Delincuencia organizada      (P5_11_20) | (P5_31_20)
+# - Privación de la libertad     (P5_11_23) | (P5_31_23)
+
+
+# Abuso de la fuerza en el arresto (pregunta 3.13)
+# - Aplicar fuerza física            (P3_13_02)
+# - Esposar                          (P3_13_03)
+# - Arma contundente                 (P3_13_04)
+# - Arma no letal                    (P3_13_05)
+# - Sustancia química                (P3_13_06)
+# - Amenazó con arma de fuego        (P3_13_07)
+# - Lesión menor                     (P3_13_08)
+# - Lesión grave                     (P3_13_09)
+# - Lesión mortal                    (P3_13_10)
+# - Disparó con arma de fuego        (P3_13_11)
+# - Hirió con arma de fuego          (P3_13_12)
+       
+# Violencia psicológica (3.17)
+# - Amenaza de cargos falsos         (P3_17_01)
+# - Amenaza de matarlo               (P3_17_02)
+# - Amenaza de daño                  (P3_17_03)
+# - Amenaza de daño a la familia     (P3_17_04)
+# - Otras amenazas                   (P3_17_05)
+# - Presión para denunciar a alguien (P3_17_06)
+# - Incomunicación                   (P3_17_07)
+# - Paseo en automóvil               (P3_17_08)
+# - Daño a su familia                (P3_17_09)
+# - Vendaron ojos                    (P3_17_11)
+
+# Violencia física (pregunta 3.18)
+# - Ataron                           (P3_18_01)
+# - Asfixia                          (P3_18_02)
+# - Tehuacán                         (P3_18_03)
+# - Golpes y patadas                 (P3_18_04)
+# - Golpes con objetos               (P3_18_05)
+# - Quemaduras                       (P3_18_06)
+# - Descagas eléctricas              (P3_18_07)
+# - Aplastamiento                    (P3_18_08)
+# - Lesiones arma blanca             (P3_18_09)
+# - Encajar agujas                   (P3_18_10)
+# - Lesiones arma de fuego           (P3_18_11)
+# - Otra agresión física             (P3_18_15)
+
+# Violencia sexual (pregunta 3.17 y 3.18)
+# - Desvestir                        (P3_17_10)
+# - Acoso sexual                     (P3_18_12)
+# - Lesiones en genitales            (P3_18_13)
+# - Violación sexual                 (P3_18_14)
+
 
 # Clasificación de variables binarias (ppo, abuso de fuerza y tortura)
 df_binaria <- df_unida                                  %>%
     mutate(
+        # Sentencia 
+        sentencia = ifelse(P5_3 %in% c(2, 3), 1, 0), 
         # Delito que amerita PPO (vigente en el año 2021)
         ppo = case_when(
             # No cometió ningún delito que amerite PPO (procesados y sentenciados)
-            !(P5_29_2   == 1 | P5_29_10 == 1 | P5_29_11 == 1 | P5_29_15 == 1 | P5_29_22 == 1) ~ 0,
-            !(P5_8_2    == 1 | P5_8_10  == 1 | P5_8_11  == 1 | P5_8_15  == 1 | P5_8_22  == 1) ~ 0,
+            !(P5_11_02 == 1 | P5_11_12 == 1 | P5_11_13 == 1 | P5_11_17 == 1 | 
+              P5_11_18 == 1 | P5_11_20 == 1 | P5_11_23 == 1 ) ~ 0,
+            !(P5_31_02 == 1 | P5_31_12 == 1 | P5_31_13 == 1 | P5_31_17 == 1 | 
+              P5_31_18 == 1 | P5_31_20 == 1 | P5_31_23 == 1 ) ~ 0, 
             # Cometió algún delito que amerite PPO (procesados y sentenciados)
-             (P5_29_2   == 1 | P5_29_10 == 1 | P5_29_11 == 1 | P5_29_15 == 1 | P5_29_22 == 1) ~ 1,
-             (P5_8_2    == 1 | P5_8_10  == 1 | P5_8_11  == 1 | P5_8_15  == 1 | P5_8_22  == 1) ~ 1,
+             (P5_11_02 == 1 | P5_11_12 == 1 | P5_11_13 == 1 | P5_11_17 == 1 | 
+              P5_11_18 == 1 | P5_11_20 == 1 | P5_11_23 == 1 ) ~ 1,
+             (P5_31_02 == 1 | P5_31_12 == 1 | P5_31_13 == 1 | P5_31_17 == 1 | 
+              P5_31_18 == 1 | P5_31_20 == 1 | P5_31_23 == 1 ) ~ 1, 
             # No sabe (no tomar en cuenta)
-              P5_29_98  == 1 ~ NA_real_, 
-              P5_8_98   == 1 ~ NA_real_, 
+              P5_11_98 == 1 ~ NA_real_, 
+              P5_31_98 == 1 ~ NA_real_, 
             # No responde (no tomar en cuenta)
-              P5_29_99  == 1 ~ NA_real_,
-              P5_8_99   == 1 ~ NA_real_), 
+              P5_11_99 == 1 ~ NA_real_,
+              P5_31_99 == 1 ~ NA_real_), 
         # Arrestos con abuso de fuerza
         uso_fuerza = case_when(
             # Sin abuso de fuerza 
-            !(P3_8_1    == 1 | P3_8_2 == 1 | P3_8_3 == 1 | P3_8_4 == 1 | 
-              P3_8_5    == 1 | P3_8_6 == 1 | P3_8_7 == 1 | P3_8_8 == 1) ~ 0, 
-            # Casos en donde se usó algún tipo de abuso de fuerza
+            !(P3_13_02 == 1 | P3_13_03 == 1 | P3_13_04 == 1 | P3_13_05 == 1 | 
+              P3_13_06 == 1 | P3_13_07 == 1 | P3_13_08 == 1 | P3_13_09 == 1 | 
+              P3_13_10 == 1 | P3_13_11 == 1 | P3_13_12 == 1) ~ 0, 
+            # Casos en donde se hubo algún tipo de abuso de fuerza
              (P3_13_02 == 1 | P3_13_03 == 1 | P3_13_04 == 1 | P3_13_05 == 1 | 
-              P3_13_06 == 1 | P3_13_07 == 1 | P3_13_08 == 1 | P3_13_09 == 1 |
+              P3_13_06 == 1 | P3_13_07 == 1 | P3_13_08 == 1 | P3_13_09 == 1 | 
               P3_13_10 == 1 | P3_13_11 == 1 | P3_13_12 == 1) ~ 1, 
             # En todas responde que no sabe o no responde
-             (P3_8_1 %in% c(8, 9) & P3_8_2 %in% c(8, 9)  & P3_8_3 %in% c(8, 9) & 
-              P3_8_4 %in% c(8, 9) & P3_8_5 %in% c(8, 9)  & P3_8_6 %in% c(8, 9) & 
-              P3_8_7 %in% c(8, 9) & P3_8_8 %in% c(8, 9)) ~ NA_real_), 
-        # Idicador 1 de tortura y malos tratos
-        torura1 = case_when(
-            # Casos donde no hubo tortura
-            !(P3_12_1 == 1 | P3_12_2 == 1 | P3_12_3 == 1 | P3_12_4 == 1 | 
-                    P3_12_5 == 1 | P3_12_6 == 1 | P3_12_7 == 1 | P3_12_8 == 1 | 
-                    P3_12_9 == 1) ~ 0,
-            # Casos en donde hubo tortura
-            (P3_12_1 == 1 | P3_12_2 == 1 | P3_12_3 == 1 | P3_12_4 == 1 | 
-                    P3_12_5 == 1 | P3_12_6 == 1 | P3_12_7 == 1 | P3_12_8 == 1 | 
-                    P3_12_9 == 1) ~ 1,
-            # Casos en donde siempre respondió no sé o no respondió 
-            (P3_12_1 %in% c(8, 9) & P3_12_2 %in% c(8, 9) & 
-                    P3_12_3 %in% c(8, 9) & P3_12_4 %in% c(8, 9) &
-                    P3_12_5 %in% c(8, 9) & P3_12_6 %in% c(8, 9) & 
-                    P3_12_7 %in% c(8, 9) & P3_12_8 %in% c(8, 9) & 
-                    P3_12_9 %in% c(8, 9)) ~ NA_real_),
-        # Indicador 1 de tortura y malos tratos
-        tortura2 = case_when(
-            # Casos donde no hubo tortura
-            !(P3_13_1 == 1 | P3_13_2 == 1 | P3_13_3 == 1 | P3_13_4 == 1 | 
-                    P3_13_5 == 1 | P3_13_6 == 1 | P3_13_7 == 1 | P3_13_8 == 1 | 
-                    P3_13_9 == 1) ~ 0,
-            # Casos en donde hubo tortura
-            (P3_13_1 == 1 | P3_13_2 == 1 | P3_13_3 == 1 | P3_13_4 == 1 | 
-                    P3_13_5 == 1 | P3_13_6 == 1 | P3_13_7 == 1 | P3_13_8 == 1 | 
-                    P3_13_9 == 1) ~ 1,
-            # Casos en donde siempre respondió no sé o no respondió 
-            (P3_13_1 %in% c(8, 9) & P3_13_2 %in% c(8, 9)  & 
-                    P3_13_3 %in% c(8, 9) & P3_13_4 %in% c(8, 9)  &
-                    P3_13_5 %in% c(8, 9) & P3_13_6 %in% c(8, 9)  & 
-                    P3_13_7 %in% c(8, 9) & P3_13_8 %in% c(8, 9)  & 
-                    P3_13_9 %in% c(8, 9)) ~ NA_real_),
-        #Juntar las dos variables de tortura 
-        tortura = ifelse(tortura1 == 1 | tortura2 == 1, 1, 0)) 
+             (P3_13_02 %in% c(8, 9) & P3_13_03 %in% c(8, 9) & 
+              P3_13_04 %in% c(8, 9) & P3_13_05 %in% c(8, 9) & 
+              P3_13_06 %in% c(8, 9) & P3_13_07 %in% c(8, 9) & 
+              P3_13_08 %in% c(8, 9) & P3_13_09 %in% c(8, 9) & 
+              P3_13_10 %in% c(8, 9) & P3_13_11 %in% c(8, 9) & 
+              P3_13_12 %in% c(8, 9) & P3_13_07 %in% c(8, 9) & 
+              P3_13_08 %in% c(8, 9)) ~ NA_real_), 
+        # Violencia psicológica 
+        violencia_psic = case_when(
+            # Casos donde no hubo violencia psicológica
+            !(P3_17_01 == 1 | P3_17_02 == 1 | P3_17_03 == 1 | P3_17_04 == 1 | 
+              P3_17_05 == 1 | P3_17_06 == 1 | P3_17_07 == 1 | P3_17_08 == 1 | 
+              P3_17_09 == 1 | P3_17_11 == 1) ~ 0,
+            # Casos donde sí hubo violencia psicológica
+             (P3_17_01 == 1 | P3_17_02 == 1 | P3_17_03 == 1 | P3_17_04 == 1 | 
+              P3_17_05 == 1 | P3_17_06 == 1 | P3_17_07 == 1 | P3_17_08 == 1 | 
+              P3_17_09 == 1 | P3_17_11 == 1) ~ 1,
+            # Casos donde no sabe o no respondió 
+             (P3_17_01 %in% c(8, 9) & P3_17_02 %in% c(8, 9) & 
+              P3_17_03 %in% c(8, 9) & P3_17_04 %in% c(8, 9) & 
+              P3_17_05 %in% c(8, 9) & P3_17_06 %in% c(8, 9) & 
+              P3_17_07 %in% c(8, 9) & P3_17_08 %in% c(8, 9) & 
+              P3_17_09 %in% c(8, 9) & P3_17_11 %in% c(8, 9)) ~ NA_real_), 
+        # Indicador de violencia física
+        violencia_fisica = case_when(
+            # Casos donde no hubo violencia física
+            !(P3_18_01 == 1 | P3_18_02 == 1 | P3_18_03 == 1 | P3_18_04 == 1 | 
+              P3_18_05 == 1 | P3_18_06 == 1 | P3_18_07 == 1 | P3_18_08 == 1 | 
+              P3_18_09 == 1 | P3_18_10 == 1 | P3_18_11 == 1 | P3_18_15 == 1) ~ 0,
+            # Casos donde sí hubo violencia física
+             (P3_18_01 == 1 | P3_18_02 == 1 | P3_18_03 == 1 | P3_18_04 == 1 | 
+              P3_18_05 == 1 | P3_18_06 == 1 | P3_18_07 == 1 | P3_18_08 == 1 | 
+              P3_18_09 == 1 | P3_18_10 == 1 | P3_18_11 == 1 | P3_18_15 == 1) ~ 1, 
+            # Casos donde no sabe o no respondió 
+             (P3_18_01 %in% c(8, 9) & P3_18_02 %in% c(8, 9) &
+              P3_18_03 %in% c(8, 9) & P3_18_04 %in% c(8, 9) & 
+              P3_18_05 %in% c(8, 9) & P3_18_06 %in% c(8, 9) & 
+              P3_18_07 %in% c(8, 9) & P3_18_08 %in% c(8, 9) & 
+              P3_18_09 %in% c(8, 9) & P3_18_10 %in% c(8, 9) & 
+              P3_18_11 %in% c(8, 9) & P3_18_15 %in% c(8, 9) ~ NA_real_)),
+        # Indicador de violencia sexual 
+        violencia_sexual = case_when(
+            !(P3_17_10 == 1 |  P3_18_12 == 1 |  P3_18_13 == 1 | P3_18_14 == 1) ~ 0,  
+             (P3_17_10 == 1 |  P3_18_12 == 1 |  P3_18_13 == 1 | P3_18_14 == 1) ~ 1, 
+             (P3_17_10 %in% c(8, 9) & P3_18_12 %in% c(8, 9) &
+              P3_18_13 %in% c(8, 9) & P3_18_14 %in% c(8, 9)) ~ NA_real_), 
+        #Juntar las dos variables de tortura
+        violencia = ifelse(
+            violencia_psic == 1 | violencia_fisica == 1 | violencia_sexual == 1,
+            1, 0)) 
 
 # Revisar que las variables nuevas estén correctas
+# table(df_binaria$sentencia)
+# sum(is.na(df_binaria$sentencia))
+# 
 # table(df_binaria$ppo)
 # sum(is.na(df_binaria$ppo))
 # 
 # table(df_binaria$uso_fuerza)
 # sum(is.na(df_binaria$uso_fuerza))
 # 
-# table(df_binaria$tortura1)
-# sum(is.na(df_binaria$tortura1))
+# table(df_binaria$violencia_psic)
+# sum(is.na(df_binaria$violencia_psic))
 # 
-# table(df_binaria$tortura2)
-# sum(is.na(df_binaria$tortura2))
+# table(df_binaria$violencia_fisica)
+# sum(is.na(df_binaria$violencia_fisica))
 # 
-# table(df_binaria$tortura)
-# sum(is.na(df_binaria$tortura))
+# table(df_binaria$violencia_sexual)
+# sum(is.na(df_binaria$violencia_sexual))
 
 
 ## 2.3. Diseño de encuesta -----------------------------------------------------
 
-# Revisar el diseño para que tenga todos los parámetros bien especificados
-
-# options(survey.lonely.psu="adjust")
-
-# df_encuesta <- df_binaria       %>%
-#     mutate_all(~as.numeric(.))  %>%
-#     as_survey_design(
-#         ids = ID_PER, strata = EST_DIS, fpc = FPC, weights = FAC_PER)
-
-
-# Diseño de encuesta solo con ids y con pesos
+# Aplicar el diseño muestral 
 df_encuesta <- df_binaria                   %>%
-    mutate_all(~as.numeric(.))              %>%
     as_survey_design(
-        ids = ID_PER, weights = FAC_PER)    
+        ids = ID_PER, strata = EST_DIS, fpc = FPC, weights = FAC_PER)
 
 # Cambiar nombre de variables y categorías
 df_enpol <- df_encuesta                     %>% 
     rename(sexo = SEXO)                     %>% 
     mutate(
         sexo = ifelse(sexo == 1, 
-            "Hombre", "Mujer"), 
+            "Hombres", "Mujeres"), 
+        sentencia = ifelse(sentencia == 1, 
+            "Con sentencia", "Sin sentencia"), 
         ppo  = ifelse(ppo  == 1, 
             "Delito que amerita PPO", "Delito que no amerita PPO"), 
         uso_fuerza = ifelse(uso_fuerza == 1, 
-            "Con uso excesivo de la fuerza", "Sin uso excesivo de la fuerza"), 
-        tortura = ifelse(tortura == 1, 
-            "Con tortura o malos tratos", "Sin tortura o malos tratos")
-    )
+            "Con uso de la fuerza", "Sin uso de la fuerza"), 
+        violencia_psic = ifelse(violencia_psic == 1, 
+            "Con violencia psicológica", "Sin violencia psicológica"),
+        violencia_fisica = ifelse(violencia_fisica == 1, 
+            "Con violencia física", "Sin violencia física"),
+        violencia_sexual = ifelse(violencia_sexual == 1, 
+            "Con violencia sexual", "Sin violencia sexual"),
+        violencia = ifelse(violencia == 1, 
+            "Con algún tipo de violencia", "Sin ningún tipo de violencia"))
 
 
 ## 2.4. Gráficas (cruces estadísticos) -----------------------------------------
 
 # Tema para gráficas 
+tema        <-  theme_linedraw() +
+    theme(
+        plot.title.position   = "plot", 
+        plot.caption.position = "plot",
+        text                  = element_text(family = "Roboto Slab", color = "black"),
+        plot.title            = element_text(family = "Roboto Slab", color = "black",   size = 16,  face  = "bold",  margin = margin(10,5,5,5)),
+        plot.subtitle         = element_text(family = "Roboto Slab", color = "black",   size = 14,  margin = margin(5, 5, 5, 5)),
+        plot.caption          = element_text(family = "Fira Sans",   color = "#92A39D", size = 11,  hjust = 0),
+        panel.grid            = element_line(linetype = 2),
+        plot.margin           = margin(0, 2, 0, 1.5, "cm"),
+        legend.position       = "top",
+        panel.border          = element_blank(),
+        legend.title          = element_text(size = 11, family = "Fira Sans", face   = "bold"),
+        legend.text           = element_text(size = 11, family = "Fira Sans"),
+        axis.title            = element_text(size = 11, family = "Fira Sans", hjust = .5, margin = margin(1,1,1,1)),
+        axis.text.y           = element_text(size = 11, family = "Fira Sans", angle=0,  hjust=.5),
+        axis.text.x           = element_text(size = 11, family = "Fira Sans", angle=90, hjust=1, vjust = 0.5),
+        strip.text.x          = element_text(size = 11, family = "Fira Sans", face = "bold", color = "black"),
+        strip.text.y          = element_text(size = 11, family = "Fira Sans", face = "bold", color = "black"), 
+        strip.background      = element_rect(fill = "white", color = NA))
+
+# Colores del tema para policy briefs del CIDE (hecho por Anabel)
+c5  <- c("#006535", "#BBD2CD", "#F59F79","#4e79a7", "#92A39D")
+c4  <- c("#006535", "#BBD2CD", "#F59F79", "#92A39D") # Verde, gris, verde grisáceo y naranja
+c3  <- c("#006535", "#F59F79", "#92A39D")
+c2  <- c("#006535", "#F59F79")  
+c1  <- c("#006535")
+
+
 # Formato para gráficas
 v_formato <- ".png"
 
 ### 2.4.1. Delitos con prisión preventiva oficiosa -----------------------------
 
+# ----- Por sexo 
+df_ppo_count <- df_enpol                    %>% 
+    group_by(sexo, ppo)                     %>% 
+    srvyr::survey_count(vartype = c("ci"))  %>% 
+    mutate(total = round(n))
+
 # Síntesis de datos 
-df_ppo <- df_enpol                          %>%
+df_ppo_perct <- df_enpol                    %>%
+    filter(!is.na(ppo))                     %>% 
     srvyr::group_by(sexo, ppo)              %>% 
     srvyr::summarise(
-        prop_ppo = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
-    mutate(ppo = as.factor(ppo)) 
+        prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
+    mutate(ppo = factor(
+        ppo, levels = c("Delito que amerita PPO", "Delito que no amerita PPO"))) 
 
+# View(df_ppo)
 # names(df_ppo)
 
 # Etiquetas de texto
 v_title     <- "Población privada de su libertad en México"
 v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
-v_caption   <- "Fuente: ENPOL 2021. Datos procesados por Intersecta."
+v_caption   <- "Fuente: Encuesta Nacional de Población Privada de la Libertad (ENPOL 2021).\nDatos procesados por Intersecta."
 v_porcent   <- "Porcentaje"
 v_sexo      <- "Sexo"
 
-
 # Visualización 
-ggplot(df_ppo, 
+ggplot(df_ppo_perct, 
     #Datos
-    aes(x = sexo, y = prop_ppo, fill = ppo)) +
+    aes(x = sexo, y = prop, fill = reorder(ppo, desc(ppo)))) +
     geom_col() +
+    geom_hline(yintercept = 0.5, linetype = "dashed") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -247,39 +364,243 @@ ggplot(df_ppo,
     # Diseño 
     theme_bw() +
     scale_y_continuous(labels = scales::percent_format()) +
+    scale_fill_manual(values = c(c5[2], c5[1])) +
+    theme(legend.position = "top")
+
+# Guardar 
+ggsave(file = paste0(out_figs, "01_enpol2021_ppo_sexo", v_formato), 
+    width = 6, height = 4)
+
+
+# ----- Por estatus y por sexo
+# Síntesis de datos 
+df_ppo2 <- df_enpol                         %>%
+    filter(!is.na(ppo))                     %>% 
+    srvyr::group_by(sexo, sentencia, ppo)   %>% 
+    srvyr::summarise(
+        prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
+    mutate(ppo = as.factor(ppo), sentencia = as.factor(sentencia)) %>% 
+    mutate(ppo = factor(
+        ppo, levels = c("Delito que amerita PPO", "Delito que no amerita PPO"))) 
+
+# names(df_ppo)
+
+# Etiquetas de texto
+v_title     <- "Población privada de su libertad en México"
+v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
+v_porcent   <- "Porcentaje"
+v_sexo      <- "Sexo"
+
+# Visualización 
+ggplot(df_ppo2, 
+    #Datos
+    aes(x = sexo, y = prop, fill = reorder(ppo, desc(ppo)))) +
+    facet_grid(~sentencia) +
+    geom_col() +
+    geom_hline(yintercept = 0.5, linetype = "dashed") +
+    # Etiquetas
+    labs(
+        title    = v_title, 
+        subtitle = v_subtitle, 
+        caption  = v_caption,
+        y        = v_porcent, 
+        x        = "",         
+        fill     = "") +
+    # Diseño 
+    theme_bw() +
+    scale_y_continuous(labels = scales::percent_format()) +
+    scale_fill_manual(values = c(c5[2], c5[1])) +
+    theme(legend.position = "top")
+
+# Guardar 
+ggsave(file = paste0(out_figs, "02_enpol2021_ppo_sexo_sentencia", v_formato), 
+    width = 6, height = 4)
+
+
+
+### 2.4.2. Uso de la fuerza ----------------------------------------------------
+
+# # Síntesis de datos 
+# df_fuerza <- df_enpol                       %>%
+#     srvyr::group_by(sexo, ppo, uso_fuerza)  %>% 
+#     srvyr::summarise(
+#         prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
+#     filter(!is.na(ppo))
+# 
+# # names(df_fuerza)
+# 
+# # Etiquetas de texto
+# v_title     <- "Población privada de su libertad en México"
+# v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
+# v_caption   <- "Fuente: ENPOL 2021. Datos procesados por Intersecta."
+# v_porcent   <- "Porcentaje"
+# v_sexo      <- "Sexo"
+# 
+# 
+# # Visualización 
+# ggplot(df_fuerza, 
+#     aes(x = ppo, y = prop, fill = uso_fuerza)) +
+#     facet_grid(~sexo) +
+#     geom_col()
+# 
+# 
+# # Guardar 
+# ggsave(file = paste0(out_figs, "03_enpol2021_ppo_sexo_sentencia", v_formato), 
+#     width = 6, height = 4)
+
+
+### 2.4.3. Violencia -----------------------------------------------------------
+
+# ---- Algún tipo de violencia
+# Síntesis de datos 
+df_data <- df_enpol                             %>%
+    filter(!is.na(violencia))                   %>% 
+    filter(!is.na(ppo))                         %>%
+    srvyr::group_by(sexo, ppo, violencia)       %>% 
+    srvyr::summarise(
+        prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) 
+
+# Etiquetas de texto
+v_title     <- "Personas privadas de su libertad arrestadas con violencia"
+v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
+
+# Visualización 
+ggplot(df_data, 
+    # Datos
+    aes(x = sexo, y = prop, fill = reorder(violencia, desc(violencia)))) +
+    geom_col() +
+    geom_hline(yintercept = 0.5, linetype = "dashed") +
+    facet_grid(~ppo) +
+    # Etiquetas
+    labs(
+        title    = v_title, 
+        subtitle = v_subtitle, 
+        caption  = v_caption,
+        y        = v_porcent, 
+        x        = "",         
+        fill     = "") +
+    # Diseño 
+    theme_bw() +
+    scale_y_continuous(labels = scales::percent_format()) +
+    scale_fill_manual(values = c(c5[2], c5[1])) +
+    theme(legend.position = "top")
+
+# Guardar 
+ggsave(file = paste0(out_figs, "04_enpol2021_violencia_sexo", v_formato), 
+    width = 6, height = 4)
+
+
+# ---- Violencia psicológica   
+# Síntesis de datos 
+df_data <- df_enpol                             %>%
+    filter(!is.na(violencia_psic))              %>% 
+    srvyr::group_by(sexo, ppo, violencia_psic)  %>% 
+    srvyr::summarise(
+        prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
+    filter(!is.na(ppo))
+
+# Etiquetas de texto
+v_title     <- "Personas privadas de su libertad arrestadas con violencia psicológica"
+v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
+
+# Visualización 
+ggplot(df_data, 
+    aes(x = sexo, y = prop, fill = reorder(violencia_psic, desc(violencia_psic)))) +
+    facet_grid(~ppo) +
+    geom_col()+
+    geom_hline(yintercept = 0.5, linetype = "dashed") +
+    # Etiquetas
+    labs(
+        title    = v_title, 
+        subtitle = v_subtitle, 
+        caption  = v_caption,
+        y        = v_porcent, 
+        x        = "",         
+        fill     = "") +
+    # Diseño 
+    theme_bw() +
+    scale_y_continuous(labels = scales::percent_format()) +
+    scale_fill_manual(values = c(c5[2], c5[1])) +
+    theme(legend.position = "top")
+
+# Guardar 
+ggsave(file = paste0(out_figs, "05_enpol2021_violencia_psicológica", v_formato), 
+    width = 6, height = 4)
+
+# ---- Violencia física    
+# Síntesis de datos 
+df_data <- df_enpol                             %>%
+    filter(!is.na(violencia_fisica)) %>% 
+    srvyr::group_by(sexo, ppo, violencia_fisica)    %>% 
+    srvyr::summarise(
+        prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
+    filter(!is.na(ppo))
+
+# Etiquetas de texto
+v_title     <- "Personas privadas de su libertad arrestadas con violencia física"
+v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
+
+# Visualización 
+ggplot(df_data, 
+    aes(x = sexo, y = prop, fill = reorder(violencia_fisica, desc(violencia_fisica)))) +
+    facet_grid(~ppo) +
+    geom_col() +
+    geom_hline(yintercept = 0.5, linetype = "dashed") +
+    # Etiquetas
+    labs(
+        title    = v_title, 
+        subtitle = v_subtitle, 
+        caption  = v_caption,
+        y        = v_porcent, 
+        x        = "",         
+        fill     = "") +
+    # Diseño 
+    theme_bw() +
+    scale_y_continuous(labels = scales::percent_format()) +
+    scale_fill_manual(values = c(c5[2], c5[1])) +
+    theme(legend.position = "top")
+
+# Guardar 
+ggsave(file = paste0(out_figs, "06_enpol2021_violencia_física", v_formato), 
+    width = 6, height = 4)
+
+
+# ---- Violencia sexual    
+# Síntesis de datos 
+df_data <- df_enpol                                                 %>%
+    filter(!is.na(violencia_sexual))                                %>% 
+    srvyr::group_by(sexo, ppo, violencia_sexual)                    %>% 
+    srvyr::summarise(
+        prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
+    filter(!is.na(ppo))
+
+# Etiquetas de texto
+v_title     <- "Personas privadas de su libertad arrestadas con violencia sexual"
+v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexual"
+
+# Visualización 
+ggplot(df_data, 
+    aes(x = sexo, y = prop, fill = reorder(violencia_sexual, desc(violencia_sexual)))) +
+    facet_grid(~ppo) +
+    geom_col() +
+    geom_hline(yintercept = 0.5, linetype = "dashed") +
+    # Etiquetas
+    labs(
+        title    = v_title, 
+        subtitle = v_subtitle, 
+        caption  = v_caption,
+        y        = v_porcent, 
+        x        = "",         
+        fill     = "") +
+    # Diseño 
+    theme_bw() +
+    scale_y_continuous(labels = scales::percent_format()) +
+    scale_fill_manual(values = c(c5[2], c5[1])) +
     theme(legend.position = "top")
 
 
 # Guardar 
-ggsave(file = paste0(out_figs, "01_enpol2016_ppo_sexo", v_formato), 
+ggsave(file = paste0(out_figs, "07_enpol2021_violencia_sexual", v_formato), 
     width = 6, height = 4)
 
-### 2.4.2. Uso de la fuerza ----------------------------------------------------
-
-df_fuerza <- df_enpol                       %>%
-    srvyr::group_by(sexo, ppo, uso_fuerza)  %>% 
-    srvyr::summarise(
-        prop_usof = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
-    filter(!is.na(ppo))
-
-# names(df_fuerza)
-
-ggplot(df_fuerza, 
-    aes(x = ppo, y = prop_usof, fill = uso_fuerza)) +
-    facet_grid(~sexo) +
-    geom_col()
-
-
-### 2.4.3. Tortura y malos tratos ----------------------------------------------
-
-df_tortura <- df_enpol                      %>%
-    srvyr::group_by(sexo, ppo, tortura)     %>% 
-    srvyr::summarise(
-        prop_tortura = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
-    filter(!is.na(ppo))
-
-
-ggplot(df_tortura, 
-    aes(x = ppo, y = prop_tortura, fill = tortura)) +
-    facet_grid(~sexo) +
-    geom_col()
+# FIN. -------------------------------------------------------------------------

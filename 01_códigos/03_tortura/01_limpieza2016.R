@@ -93,17 +93,21 @@ dim(df_unida) # Las mismas 58,127 observaciones
 
 ## 2.2. Clasificación de variables binarias ------------------------------------
 
-# Clasificación de PPO vigente en 2021
+# Clasificación de PPO vigente en 2016
+# - Homicidio doloso ()
+# - Portación ilegal de armas
+# - Secuestro y secuestro exprés
+# - Violación sexual 
+# - Privación de la libertad
 
 # Observaciones donde la persona no sabe o no respondió sobre el delito
 table(df_unida$P5_8_98)
 table(df_unida$P5_8_99)
 
-
 # Clasificación de variables binarias (ppo, abuso de fuerza y tortura)
 df_binaria <- df_unida                                  %>%
     mutate(
-        # Delito que amerita PPO (vigente en el año 2016)
+        # Delito que amerita PPO 
         ppo = case_when(
             # No cometió ningún delito que amerite PPO (procesados y sentenciados)
             !(P5_29_10 == 1 | P5_29_11 == 1 | P5_29_15 == 1 | P5_29_22 == 1) ~ 0,
@@ -122,7 +126,7 @@ df_binaria <- df_unida                                  %>%
             # Sin abuso de fuerza 
             !(P3_8_1    == 1 | P3_8_2 == 1 | P3_8_3 == 1 | P3_8_4 == 1 | 
               P3_8_5    == 1 | P3_8_6 == 1 | P3_8_7 == 1 | P3_8_8 == 1) ~ 0, 
-            # Casos en donde se usó algún tipo de abuso de fuerza
+            # Casos en donde se hubo algún tipo de abuso de fuerza
              (P3_8_1    == 1 | P3_8_2 == 1 | P3_8_3 == 1 | P3_8_4 == 1 | 
               P3_8_5    == 1 | P3_8_6 == 1 | P3_8_7 == 1 | P3_8_8 == 1) ~ 1, 
             # En todas responde que no sabe o no responde
