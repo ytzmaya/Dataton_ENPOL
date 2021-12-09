@@ -5,7 +5,7 @@
 # Encargadas:            Adriana Ortega (INTR)  | Regina I. Medina (INTR)
 # Correo:                aortega@intersecta.org | rmedina@intersecta.org
 # Fecha de creación:     06 de diciembre de 2021
-# Última actualización:  07 de diciembre de 2021
+# Última actualización:  08 de diciembre de 2021
 #------------------------------------------------------------------------------#
 
 # Fuente: https://www.inegi.org.mx/programas/enpol/2016/
@@ -288,26 +288,22 @@ df_enpol <- df_encuesta                     %>%
 ## 2.4. Gráficas (cruces estadísticos) -----------------------------------------
 
 # Tema para gráficas 
-tema        <-  theme_linedraw() +
-    theme(
-        plot.title.position   = "plot", 
-        plot.caption.position = "plot",
-        text                  = element_text(family = "Roboto Slab", color = "black"),
-        plot.title            = element_text(family = "Roboto Slab", color = "black",   size = 16,  face  = "bold",  margin = margin(10,5,5,5)),
-        plot.subtitle         = element_text(family = "Roboto Slab", color = "black",   size = 14,  margin = margin(5, 5, 5, 5)),
-        plot.caption          = element_text(family = "Fira Sans",   color = "#92A39D", size = 11,  hjust = 0),
-        panel.grid            = element_line(linetype = 2),
-        plot.margin           = margin(0, 2, 0, 1.5, "cm"),
-        legend.position       = "top",
-        panel.border          = element_blank(),
-        legend.title          = element_text(size = 11, family = "Fira Sans", face   = "bold"),
-        legend.text           = element_text(size = 11, family = "Fira Sans"),
-        axis.title            = element_text(size = 11, family = "Fira Sans", hjust = .5, margin = margin(1,1,1,1)),
-        axis.text.y           = element_text(size = 11, family = "Fira Sans", angle=0,  hjust=.5),
-        axis.text.x           = element_text(size = 11, family = "Fira Sans", angle=90, hjust=1, vjust = 0.5),
-        strip.text.x          = element_text(size = 11, family = "Fira Sans", face = "bold", color = "black"),
-        strip.text.y          = element_text(size = 11, family = "Fira Sans", face = "bold", color = "black"), 
-        strip.background      = element_rect(fill = "white", color = NA))
+tema <-  theme_linedraw() +
+    theme(text = element_text(family = "Avenir Next Condensed", color = "black"),
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5, margin = margin(10,5,5,5), family="Avenir Next Condensed", color = "black"),
+        plot.subtitle = element_text(size = 13, color = "#666666", hjust = 0.5, margin = margin(5, 5, 5, 5), family="Avenir Next Condensed"),
+        plot.caption = element_text(hjust = .5, size = 9, family = "Avenir Next Condensed", color = "black"),
+        panel.grid = element_line(linetype = 2), 
+        legend.position = "top",
+        panel.grid.minor = element_blank(),
+        legend.title = element_text(size = 10, face = "bold", family="Avenir Next Condensed"),
+        legend.text = element_text(size = 10, family="Avenir Next Condensed"),
+        axis.title = element_text(size = 10, hjust = .5, margin = margin(1,1,1,1), family="Avenir Next Condensed"),
+        axis.text.y = element_text(size = 8, family="Avenir Next Condensed", angle=0, hjust=.5),
+        axis.text.x = element_text(size = 8, family="Avenir Next Condensed", angle=90, hjust=.5),
+        strip.background = element_rect(fill="white", colour = NA),
+        strip.text.x = element_text(size=9, family = "Avenir Next Condensed", face = "bold", color = "black"),
+        strip.text.y = element_text(size=9, family = "Avenir Next Condensed"))
 
 # Colores del tema para policy briefs del CIDE (hecho por Anabel)
 c5  <- c("#006535", "#BBD2CD", "#F59F79","#4e79a7", "#92A39D")
@@ -321,6 +317,17 @@ c1  <- c("#006535")
 v_formato <- ".png"
 
 ### 2.4.1. Delitos con prisión preventiva oficiosa -----------------------------
+
+# Etiquetas de texto
+v_title     <- "Población privada de su libertad en México"
+v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexo"
+v_caption   <- "
+Fuente: Encuesta Nacional de Población Privada de la Libertad (ENPOL 2021). Datos procesados por Intersecta.
+Nota: Los delitos incluidos en aquellos que ameritan prisión preventiva oficiosa (PPO) son: 
+robo a casa habitación, homicidio doloso, portación ilegal de armas, secuestro, violación sexual, 
+delincuencia organizada y privación de la libertad."
+v_porcent   <- "Porcentaje"
+v_sexo      <- "Sexo"
 
 # ----- Por sexo 
 df_ppo_count <- df_enpol                    %>% 
@@ -340,18 +347,13 @@ df_ppo_perct <- df_enpol                    %>%
 # View(df_ppo)
 # names(df_ppo)
 
-# Etiquetas de texto
-v_title     <- "Población privada de su libertad en México"
-v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
-v_caption   <- "Fuente: Encuesta Nacional de Población Privada de la Libertad (ENPOL 2021).\nDatos procesados por Intersecta."
-v_porcent   <- "Porcentaje"
-v_sexo      <- "Sexo"
-
 # Visualización 
 ggplot(df_ppo_perct, 
     #Datos
     aes(x = sexo, y = prop, fill = reorder(ppo, desc(ppo)))) +
     geom_col() +
+    geom_label(aes(label = scales::percent(prop)), 
+        position = position_stack(1), fill = "white") +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
     # Etiquetas
     labs(
@@ -369,7 +371,7 @@ ggplot(df_ppo_perct,
 
 # Guardar 
 ggsave(file = paste0(out_figs, "01_enpol2021_ppo_sexo", v_formato), 
-    width = 6, height = 4)
+    width = 7, height = 6)
 
 
 # ----- Por estatus y por sexo
@@ -387,7 +389,7 @@ df_ppo2 <- df_enpol                         %>%
 
 # Etiquetas de texto
 v_title     <- "Población privada de su libertad en México"
-v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
+v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexo"
 v_porcent   <- "Porcentaje"
 v_sexo      <- "Sexo"
 
@@ -396,8 +398,11 @@ ggplot(df_ppo2,
     #Datos
     aes(x = sexo, y = prop, fill = reorder(ppo, desc(ppo)))) +
     facet_grid(~sentencia) +
+    # Geom
     geom_col() +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
+    geom_label(aes(label = scales::percent(prop)), 
+        position = position_stack(1), fill = "white") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -414,8 +419,7 @@ ggplot(df_ppo2,
 
 # Guardar 
 ggsave(file = paste0(out_figs, "02_enpol2021_ppo_sexo_sentencia", v_formato), 
-    width = 6, height = 4)
-
+    width = 7, height = 6)
 
 
 ### 2.4.2. Uso de la fuerza ----------------------------------------------------
@@ -462,15 +466,18 @@ df_data <- df_enpol                             %>%
 
 # Etiquetas de texto
 v_title     <- "Personas privadas de su libertad arrestadas con violencia"
-v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
+v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexo"
 
 # Visualización 
 ggplot(df_data, 
     # Datos
-    aes(x = sexo, y = prop, fill = reorder(violencia, desc(violencia)))) +
+    aes(x = ppo, y = prop, fill = reorder(violencia, desc(violencia)))) +
+    facet_grid(~sexo) +
+    # Geoms
     geom_col() +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
-    facet_grid(~ppo) +
+    geom_label(aes(label = scales::percent(prop)), 
+        position = position_stack(1), fill = "white") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -487,7 +494,7 @@ ggplot(df_data,
 
 # Guardar 
 ggsave(file = paste0(out_figs, "04_enpol2021_violencia_sexo", v_formato), 
-    width = 6, height = 4)
+    width = 7, height = 6)
 
 
 # ---- Violencia psicológica   
@@ -505,10 +512,13 @@ v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
 
 # Visualización 
 ggplot(df_data, 
-    aes(x = sexo, y = prop, fill = reorder(violencia_psic, desc(violencia_psic)))) +
-    facet_grid(~ppo) +
+    aes(x = ppo, y = prop, fill = reorder(violencia_psic, desc(violencia_psic)))) +
+    facet_grid(~sexo) +
+    #Geoms
     geom_col()+
     geom_hline(yintercept = 0.5, linetype = "dashed") +
+    geom_label(aes(label = scales::percent(prop)), 
+        position = position_stack(1), fill = "white") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -525,12 +535,12 @@ ggplot(df_data,
 
 # Guardar 
 ggsave(file = paste0(out_figs, "05_enpol2021_violencia_psicológica", v_formato), 
-    width = 6, height = 4)
+    width = 7, height = 6)
 
 # ---- Violencia física    
 # Síntesis de datos 
-df_data <- df_enpol                             %>%
-    filter(!is.na(violencia_fisica)) %>% 
+df_data <- df_enpol                                 %>%
+    filter(!is.na(violencia_fisica))                %>% 
     srvyr::group_by(sexo, ppo, violencia_fisica)    %>% 
     srvyr::summarise(
         prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) %>% 
@@ -538,14 +548,17 @@ df_data <- df_enpol                             %>%
 
 # Etiquetas de texto
 v_title     <- "Personas privadas de su libertad arrestadas con violencia física"
-v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
+v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexo"
 
 # Visualización 
 ggplot(df_data, 
-    aes(x = sexo, y = prop, fill = reorder(violencia_fisica, desc(violencia_fisica)))) +
-    facet_grid(~ppo) +
+    aes(x = ppo, y = prop, fill = reorder(violencia_fisica, desc(violencia_fisica)))) +
+    facet_grid(~sexo) +
+    # Geoms
     geom_col() +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
+    geom_label(aes(label = scales::percent(prop)), 
+        position = position_stack(1), fill = "white") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -562,7 +575,7 @@ ggplot(df_data,
 
 # Guardar 
 ggsave(file = paste0(out_figs, "06_enpol2021_violencia_física", v_formato), 
-    width = 6, height = 4)
+    width = 7, height = 6)
 
 
 # ---- Violencia sexual    
@@ -576,14 +589,17 @@ df_data <- df_enpol                                                 %>%
 
 # Etiquetas de texto
 v_title     <- "Personas privadas de su libertad arrestadas con violencia sexual"
-v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexual"
+v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexual"
 
 # Visualización 
 ggplot(df_data, 
-    aes(x = sexo, y = prop, fill = reorder(violencia_sexual, desc(violencia_sexual)))) +
-    facet_grid(~ppo) +
+    aes(x = ppo, y = prop, fill = reorder(violencia_sexual, desc(violencia_sexual)))) +
+    facet_grid(~sexo) +
+    #Geoms
     geom_col() +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
+    geom_label(aes(label = scales::percent(prop)), 
+    position = position_stack(1), fill = "white") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -598,9 +614,8 @@ ggplot(df_data,
     scale_fill_manual(values = c(c5[2], c5[1])) +
     theme(legend.position = "top")
 
-
 # Guardar 
 ggsave(file = paste0(out_figs, "07_enpol2021_violencia_sexual", v_formato), 
-    width = 6, height = 4)
+    width = 7, height = 6)
 
 # FIN. -------------------------------------------------------------------------
