@@ -300,7 +300,7 @@ tema <-  theme_linedraw() +
         legend.text = element_text(size = 10, family="Avenir Next Condensed"),
         axis.title = element_text(size = 10, hjust = .5, margin = margin(1,1,1,1), family="Avenir Next Condensed"),
         axis.text.y = element_text(size = 8, family="Avenir Next Condensed", angle=0, hjust=.5),
-        axis.text.x = element_text(size = 8, family="Avenir Next Condensed", angle=90, hjust=.5),
+        axis.text.x = element_text(size = 8, family="Avenir Next Condensed", angle=0, hjust=.5),
         strip.background = element_rect(fill="white", colour = NA),
         strip.text.x = element_text(size=9, family = "Avenir Next Condensed", face = "bold", color = "black"),
         strip.text.y = element_text(size=9, family = "Avenir Next Condensed"))
@@ -323,9 +323,8 @@ v_title     <- "Población privada de su libertad en México"
 v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexo"
 v_caption   <- "
 Fuente: Encuesta Nacional de Población Privada de la Libertad (ENPOL 2021). Datos procesados por Intersecta.
-Nota: Los delitos incluidos en aquellos que ameritan prisión preventiva oficiosa (PPO) son: 
-robo a casa habitación, homicidio doloso, portación ilegal de armas, secuestro, violación sexual, 
-delincuencia organizada y privación de la libertad."
+Nota: Los delitos incluidos en aquellos que ameritan prisión preventiva oficiosa (PPO) son: robo a casa habitación,
+homicidio doloso, portación ilegal de armas, secuestro, violación sexual, delincuencia organizada y privación de la libertad."
 v_porcent   <- "Porcentaje"
 v_sexo      <- "Sexo"
 
@@ -353,7 +352,8 @@ ggplot(df_ppo_perct,
     aes(x = sexo, y = prop, fill = reorder(ppo, desc(ppo)))) +
     geom_col() +
     geom_label(aes(label = scales::percent(prop)), 
-        position = position_stack(1), fill = "white") +
+        position = position_stack(1), fill = "white",
+        family = "Avenir Next Condensed") +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
     # Etiquetas
     labs(
@@ -364,7 +364,7 @@ ggplot(df_ppo_perct,
         x        = "",         
         fill     = "") +
     # Diseño 
-    theme_bw() +
+    tema +
     scale_y_continuous(labels = scales::percent_format()) +
     scale_fill_manual(values = c(c5[2], c5[1])) +
     theme(legend.position = "top")
@@ -389,9 +389,6 @@ df_ppo2 <- df_enpol                         %>%
 
 # Etiquetas de texto
 v_title     <- "Población privada de su libertad en México"
-v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexo"
-v_porcent   <- "Porcentaje"
-v_sexo      <- "Sexo"
 
 # Visualización 
 ggplot(df_ppo2, 
@@ -402,7 +399,8 @@ ggplot(df_ppo2,
     geom_col() +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
     geom_label(aes(label = scales::percent(prop)), 
-        position = position_stack(1), fill = "white") +
+        position = position_stack(1), fill = "white", 
+        family = "Avenir Next Condensed") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -412,7 +410,7 @@ ggplot(df_ppo2,
         x        = "",         
         fill     = "") +
     # Diseño 
-    theme_bw() +
+    tema +
     scale_y_continuous(labels = scales::percent_format()) +
     scale_fill_manual(values = c(c5[2], c5[1])) +
     theme(legend.position = "top")
@@ -465,8 +463,7 @@ df_data <- df_enpol                             %>%
         prop = survey_mean(na.rm = T, vartype = "ci", level = 0.99)) 
 
 # Etiquetas de texto
-v_title     <- "Personas privadas de su libertad arrestadas con violencia"
-v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexo"
+v_title     <- "Personas privadas de su libertad arrestadas con violencia\n(psicológica, física o sexual)"
 
 # Visualización 
 ggplot(df_data, 
@@ -477,7 +474,8 @@ ggplot(df_data,
     geom_col() +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
     geom_label(aes(label = scales::percent(prop)), 
-        position = position_stack(1), fill = "white") +
+        position = position_stack(1), fill = "white", 
+        family = "Avenir Next Condensed") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -487,7 +485,7 @@ ggplot(df_data,
         x        = "",         
         fill     = "") +
     # Diseño 
-    theme_bw() +
+    tema +
     scale_y_continuous(labels = scales::percent_format()) +
     scale_fill_manual(values = c(c5[2], c5[1])) +
     theme(legend.position = "top")
@@ -508,7 +506,6 @@ df_data <- df_enpol                             %>%
 
 # Etiquetas de texto
 v_title     <- "Personas privadas de su libertad arrestadas con violencia psicológica"
-v_subtitle  <- "Por delito que amerita prisión prentiva oficiosa y por sexo"
 
 # Visualización 
 ggplot(df_data, 
@@ -518,7 +515,8 @@ ggplot(df_data,
     geom_col()+
     geom_hline(yintercept = 0.5, linetype = "dashed") +
     geom_label(aes(label = scales::percent(prop)), 
-        position = position_stack(1), fill = "white") +
+        position = position_stack(1), fill = "white", 
+        family = "Avenir Next Condensed") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -528,7 +526,7 @@ ggplot(df_data,
         x        = "",         
         fill     = "") +
     # Diseño 
-    theme_bw() +
+    tema +
     scale_y_continuous(labels = scales::percent_format()) +
     scale_fill_manual(values = c(c5[2], c5[1])) +
     theme(legend.position = "top")
@@ -558,7 +556,8 @@ ggplot(df_data,
     geom_col() +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
     geom_label(aes(label = scales::percent(prop)), 
-        position = position_stack(1), fill = "white") +
+        position = position_stack(1), fill = "white", 
+        family = "Avenir Next Condensed") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -568,7 +567,7 @@ ggplot(df_data,
         x        = "",         
         fill     = "") +
     # Diseño 
-    theme_bw() +
+    tema +
     scale_y_continuous(labels = scales::percent_format()) +
     scale_fill_manual(values = c(c5[2], c5[1])) +
     theme(legend.position = "top")
@@ -589,7 +588,6 @@ df_data <- df_enpol                                                 %>%
 
 # Etiquetas de texto
 v_title     <- "Personas privadas de su libertad arrestadas con violencia sexual"
-v_subtitle  <- "Por delitos que ameritan prisión prentiva oficiosa y por sexual"
 
 # Visualización 
 ggplot(df_data, 
@@ -599,7 +597,8 @@ ggplot(df_data,
     geom_col() +
     geom_hline(yintercept = 0.5, linetype = "dashed") +
     geom_label(aes(label = scales::percent(prop)), 
-    position = position_stack(1), fill = "white") +
+    position = position_stack(1), fill = "white", 
+    family = "Avenir Next Condensed") +
     # Etiquetas
     labs(
         title    = v_title, 
@@ -609,7 +608,7 @@ ggplot(df_data,
         x        = "",         
         fill     = "") +
     # Diseño 
-    theme_bw() +
+    tema +
     scale_y_continuous(labels = scales::percent_format()) +
     scale_fill_manual(values = c(c5[2], c5[1])) +
     theme(legend.position = "top")
